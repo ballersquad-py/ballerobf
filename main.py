@@ -13,7 +13,6 @@ import binascii
 import marshal
 
 def obfuscate_variable_name(name):
-    # Generate a random name with the same length as the original
     return ''.join(random.choice(string.ascii_letters) for _ in range(len(name)))
 
 def obfuscate_code(input_code):
