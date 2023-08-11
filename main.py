@@ -82,7 +82,7 @@ def main_menu():
             print("Invalid choice. Please enter 1 or 2")
 
 def obfuscate_main():
-    parser = argparse.ArgumentParser(description="Python Code Obfuscation Tool")
+    parser = argparse.ArgumentParser(description="Code Obfuscator")
     parser.add_argument("--input", type=str, help="Input Python file to obfuscate")
     parser.add_argument("--output", type=str, help="Output file for the obfuscated code")
     parser.add_argument(
