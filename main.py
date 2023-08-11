@@ -85,8 +85,6 @@ def obfuscate_main():
     parser = argparse.ArgumentParser(description="Code Obfuscator")
     parser.add_argument("--input", type=str, help="Input Python file to obfuscate")
     parser.add_argument("--output", type=str, help="Output file for the obfuscated code")
-    parser.add_argument(
-        "--complexity", type=int, help="Complexity of obfuscation (recommended: 100)"
     )
     args = parser.parse_args()
 
