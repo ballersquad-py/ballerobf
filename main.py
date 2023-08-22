@@ -12,38 +12,38 @@ import bz2
 import binascii
 import marshal
 
-def obfuscate_variable_name(name):
+def obf(name):
     return ''.join(random.choice(string.ascii_letters) for _ in range(len(name)))
 
-def obfuscate_code(input_code):
+def obfuscate(code):
     try:
-        parsed_code = ast.parse(input_code)
+        parsed_code = ast.parse(code)
     except SyntaxError:
         return "Error: Invalid Python code"
 
-    def obfuscate_node(node):
+    def obf_node(node):
         if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load):
-            return ast.copy_location(ast.Name(id=obfuscate_variable_name(node.id), ctx=node.ctx), node)
+            return ast.copy_location(ast.Name(id=obf(node.id), ctx=node.ctx), node)
         return node
 
-    obfuscated_ast = ast.fix_missing_locations(obfuscate_node(parsed_code))
+    obfd_ast = ast.fix_missing_locations(obf_node(parsed_code))
 
-    obfuscated_code = ast.fix_missing_locations(obfuscated_ast)
-    obfuscated_code = compile(obfuscated_code, filename="<ast>", mode="exec")
+    obfd_code = ast.fix_missing_locations(obfd_ast)
+    obfd_code = compile(obfd_code, filename="<ast>", mode="exec")
 
-    return obfuscated_code
+    return obfd_code
 
-def save_obfuscated_code(output_file, obfuscated_code):
+def save(output_file, obfd_code):
     with open(output_file, 'w') as f:
-        f.write(obfuscated_code)
+        f.write(obfd_code)
 
-def obfuscate_source(source: str, complexity: int) -> str:
+def obf_source(source: str, complexity: int) -> str:
     encoded_source = source
     for _ in range(complexity):
         encoded_source = encode(source=encoded_source)
     return encoded_source
 
-def print_ascii_art():
+def menu():
     ascii_art = """
     ______       _ _               _________________ 
     | ___ \     | | |             |  _  | ___ \  ___|
@@ -61,7 +61,7 @@ def encode(source: str) -> str:
     marshal_encoded = marshal.dumps(compile(source, "Py-Fuscate", "exec"))
     if selected_mode is binascii:
         return "import marshal,lzma,gzip,bz2,binascii,zlib;exec(marshal.loads(binascii.a2b_base64({})))".format(
-            binascii.b2a_base64(marshal_encoded)
+            binascii.b2a_base64(marshal_encoded).decode()
         )
     return "import marshal,lzma,gzip,bz2,binascii,zlib;exec(marshal.loads({}.decompress({})))".format(
         selected_mode.__name__, selected_mode.compress(marshal_encoded)
@@ -69,43 +69,43 @@ def encode(source: str) -> str:
 
 def main_menu():
     while True:
-        print_ascii_art()
+        menu()
         print("1. Obfuscate")
         print("2. Quit")
 
         choice = input("Enter your choice (1/2): ")
         if choice == "1":
-            obfuscate_main()
+            obf_code()
         elif choice == "2":
             break
         else:
             print("Invalid choice. Please enter 1 or 2")
 
-def obfuscate_main():
+def obf_code():
     parser = argparse.ArgumentParser(description="Code Obfuscator")
     parser.add_argument("--input", type=str, help="Input Python file to obfuscate")
     parser.add_argument("--output", type=str, help="Output file for the obfuscated code")
-    )
+    parser.add_argument("--complexity", type=int, help="Obfuscation complexity")
     args = parser.parse_args()
 
-    input_file = args.input
+    file = args.input
     output_file = args.output
 
-    if input_file is None:
-        input_file = input("Enter the input file name (must be in the same folder as the script): ")
+    if file is None:
+        file = input("Enter the file name: ")
 
-    with open(input_file, "r") as f:
-        input_code = f.read()
+    with open(file, "r") as f:
+        code = f.read()
 
     if args.complexity is None:
         args.complexity = 100
 
-    obfuscated_code = obfuscate_source(input_code, args.complexity)
+    obfd_code = obf_source(code, args.complexity)
 
     if output_file is None:
         output_file = "obfuscated_code.py"
 
-    save_obfuscated_code(output_file, obfuscated_code)
+    save(output_file, obfd_code)
 
     print(f"Obfuscated code saved to {output_file}")
 
