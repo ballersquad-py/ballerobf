@@ -3,14 +3,8 @@ import ast
 import os
 import random
 import string
-import zlib
-import colorama
-import pyfiglet
-import lzma
-import gzip
-import bz2
-import binascii
 import marshal
+import zlib
 
 def obf(name):
     return ''.join(random.choice(string.ascii_letters) for _ in range(len(name)))
@@ -43,29 +37,10 @@ def obf_source(source: str, complexity: int) -> str:
         encoded_source = encode(source=encoded_source)
     return encoded_source
 
-def menu():
-    ascii_art = """
-    ______       _ _               _________________ 
-    | ___ \     | | |             |  _  | ___ \  ___|
-    | |_/ / __ _| | | ___ _ __ ___| | | | |_/ / |_   
-    | ___ \/ _` | | |/ _ \ '__/ __| | | | ___ \  _|  
-    | |_/ / (_| | | |  __/ |  \__ \ \_/ / |_/ / |    
-    \____/ \__,_|_|_|\___|_|  |___/\___/\____/\_|    
-                                                 
-                                                 
-    """
-    print(colorama.Style.BRIGHT + colorama.Fore.LIGHTCYAN_EX + ascii_art)
-
 def encode(source: str) -> str:
-    selected_mode = random.choice((lzma, gzip, bz2, binascii, zlib))
     marshal_encoded = marshal.dumps(compile(source, "Py-Fuscate", "exec"))
-    if selected_mode is binascii:
-        return "import marshal,lzma,gzip,bz2,binascii,zlib;exec(marshal.loads(binascii.a2b_base64({})))".format(
-            binascii.b2a_base64(marshal_encoded).decode()
-        )
-    return "import marshal,lzma,gzip,bz2,binascii,zlib;exec(marshal.loads({}.decompress({})))".format(
-        selected_mode.__name__, selected_mode.compress(marshal_encoded)
-    )
+    zlib_encoded = zlib.compress(marshal_encoded)
+    return f"exec(__import__('marshal').loads(__import__('zlib').decompress({repr(zlib_encoded)})))"
 
 def main_menu():
     while True:
@@ -75,13 +50,13 @@ def main_menu():
 
         choice = input("Enter your choice (1/2): ")
         if choice == "1":
-            obf_code()
+            obfuscate_code()
         elif choice == "2":
             break
         else:
             print("Invalid choice. Please enter 1 or 2")
 
-def obf_code():
+def obfuscate_code():
     parser = argparse.ArgumentParser(description="Code Obfuscator")
     parser.add_argument("--input", type=str, help="Input Python file to obfuscate")
     parser.add_argument("--output", type=str, help="Output file for the obfuscated code")
@@ -94,7 +69,7 @@ def obf_code():
     if file is None:
         file = input("Enter the file name: ")
 
-    with open(file, "r") as f:
+    with open(file, "r", encoding="utf-8") as f:  # Specify encoding as utf-8
         code = f.read()
 
     if args.complexity is None:
@@ -108,6 +83,20 @@ def obf_code():
     save(output_file, obfd_code)
 
     print(f"Obfuscated code saved to {output_file}")
+
+
+def menu():
+    ascii_art = """
+    ______       _ _               _________________ 
+    | ___ \     | | |             |  _  | ___ \  ___|
+    | |_/ / __ _| | | ___ _ __ ___| | | | |_/ / |_   
+    | ___ \/ _` | | |/ _ \ '__/ __| | | | ___ \  _|  
+    | |_/ / (_| | | |  __/ |  \__ \ \_/ / |_/ / |    
+    \____/ \__,_|_|_|\___|_|  |___/\___/\____/\_|    
+                                                 
+                                                 
+    """
+    print(ascii_art)
 
 if __name__ == "__main__":
     main_menu()
